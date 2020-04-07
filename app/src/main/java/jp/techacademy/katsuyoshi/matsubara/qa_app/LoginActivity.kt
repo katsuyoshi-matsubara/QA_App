@@ -63,6 +63,10 @@ class LoginActivity : AppCompatActivity() {
                 //成功した場合ログインを行う
                 val email = emailText.text.toString()
                 val password = passwordText.text.toString()
+                login(email, password)//4/6のメンタリングで抜けてたからエラー
+    //下の二つ勝手に追加
+                val view = findViewById<View>(android.R.id.content)
+                Snackbar.make(view, "アカウント作成・ログインしています", Snackbar.LENGTH_LONG).show()
             } else {
                 //失敗した場合 エラーを表示する
                 val view = findViewById<View>(android.R.id.content)
@@ -111,7 +115,7 @@ class LoginActivity : AppCompatActivity() {
                             saveName(data!!["name"] as String)
                         }
 
-                        override fun onCancelled(p0: DatabaseError) {}
+                        override fun onCancelled(firebaseError: DatabaseError) {}
                     })
                 }
 
@@ -140,7 +144,7 @@ class LoginActivity : AppCompatActivity() {
         //そしてcreateAccountメソッドを呼び出しアカウント作成処理を開始させます。
         //ログインボタンのタップした時には同様にキーボードを閉じ、
         // loginメソッドを呼び出してログイン処理を開始させます。
-        createButton.setOnClickListener() { v ->
+        createButton.setOnClickListener { v ->
             //キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
@@ -190,8 +194,7 @@ class LoginActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         //アカウントを作成する
-        mAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(mCreateAccountListener)
+        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(mCreateAccountListener)
     }
 
     //ログイン処理を行うloginメソッドではプログレスバーを表示させ、

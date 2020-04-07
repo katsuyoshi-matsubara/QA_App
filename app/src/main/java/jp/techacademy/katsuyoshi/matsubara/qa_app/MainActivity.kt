@@ -206,7 +206,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mAdapter = QuestionsListAdapter(this)
         mQuestionArrayList = ArrayList<Question>()
         mAdapter.notifyDataSetChanged()
-        //---ここまで追加
+        //---ここまで追加8.5
+
+        //9.4 QuestionDetailActivityの実装が完了したら質問一覧画面でリストを
+        // タップしたらその質問の詳細画面に飛ぶように修正します。
+        // ListViewのsetOnItemClickListenerメソッドでリスナーを登録し、
+        // リスナーの中で質問に相当するQuestionのインスタンスを渡して
+        // QuestionDetailActivityに遷移させます。
+        mListView.setOnItemClickListener { parent, view, position, id ->
+            //Questionのインスタンスを渡して質問詳細画面を起動する
+            val intent = Intent(applicationContext, QuestionDetailActivity::class.java)
+            intent.putExtra("question", mQuestionArrayList[position])
+            startActivity(intent)
+            //ここまで9.4
+        }
     }
 
     //7-6 onResume メソッドを追加し、 mGenre == 0 の場合、
