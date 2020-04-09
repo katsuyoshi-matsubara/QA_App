@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#e47504</color>
     <color name="colorAccent">#009688</color>
     <color name="colorButtonText">#FFFFFF</color>
+    <color name="colorButtonFavoriteOff">#dddddd</color>
+    <color name="colorButtonTextFavoriteOff">#aaaaaa</color>
+    <color name="colorButtonFavoriteOn">#e47504</color>
+
 </resources>

@@ -14,6 +14,7 @@ import android.util.Base64
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ListView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
@@ -24,6 +25,7 @@ import com.google.firebase.database.DatabaseError
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.list_question_detail.*
 
 //MainActivityからログイン画面を呼び出すように修正します。
 // onCreateメソッドの中で記述されているFloatingActionButtonの

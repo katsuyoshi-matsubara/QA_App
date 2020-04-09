@@ -12,6 +12,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.list_question_detail.*
 
 
 //メソッド名	実装/修正する内容
@@ -63,7 +64,7 @@ class LoginActivity : AppCompatActivity() {
                 //成功した場合ログインを行う
                 val email = emailText.text.toString()
                 val password = passwordText.text.toString()
-                login(email, password)//4/6のメンタリングで抜けてたからエラー
+                login(email, password)//4/6のメンタリングで抜けてたからエラーprogressbarが回り続ける
     //下の二つ勝手に追加
                 val view = findViewById<View>(android.R.id.content)
                 Snackbar.make(view, "アカウント作成・ログインしています", Snackbar.LENGTH_LONG).show()
@@ -76,7 +77,6 @@ class LoginActivity : AppCompatActivity() {
                 progressBar.visibility = View.GONE
             }
         }
-
         //Firebaseのログイン処理もOnCompleteListenerクラスで受け取ります。
         //ログインに成功したときはmIsCreateAccountを使ってアカウント作成
         // ボタンを押してからのログイン処理か、ログインボタンをタップの
@@ -85,13 +85,6 @@ class LoginActivity : AppCompatActivity() {
         // Preferenceに保存します。Firebaseは、データをKeyとValueの
         // 組み合わせで保存します。DatabaseReferenceが指し示すKeyにValue
         // を保存するには setValue メソッドを使用します。
-        // ログインボタンをタップしたときは、Firebaseから表示名を取得して
-        // Preferenceに保存します。Firebaseからデータを一度だけ取得する
-        // 場合はDatabaseReferenceクラスが実装しているQueryクラスの
-        // addListenerForSingleValueEventメソッドを使います。ログインに
-        // 失敗した場合は、Snackbarでエラーの旨を表示し、処理中に表示して
-        // いたダイアログを非表示にします。最後に finish() メソッドで
-        // LoginActivity を閉じます。
         mLoginListener = OnCompleteListener { task ->
             if (task.isSuccessful) {
                 // 成功した場合
@@ -101,7 +94,7 @@ class LoginActivity : AppCompatActivity() {
                 if (mIsCreateAccount) {
                     //アカウント作成の時は表示名をFirebaseに保存する
                     val name = nameText.text.toString()
-
+//TODO
                     val data = HashMap<String, String>()
                     data["name"] = name
                     userRef.setValue(data)
@@ -164,6 +157,13 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
+        // ログインボタンをタップしたときは、Firebaseから表示名を取得して
+        // Preferenceに保存します。Firebaseからデータを一度だけ取得する
+        // 場合はDatabaseReferenceクラスが実装しているQueryクラスの
+        // addListenerForSingleValueEventメソッドを使います。ログインに
+        // 失敗した場合は、Snackbarでエラーの旨を表示し、処理中に表示して
+        // いたダイアログを非表示にします。最後に finish() メソッドで
+        // LoginActivity を閉じます。
         loginButton.setOnClickListener { v ->
             //キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -208,6 +208,7 @@ class LoginActivity : AppCompatActivity() {
 
         //ログインする
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(mLoginListener)
+
     }
     //saveNameメソッドでは引数で受け取った表示名をPreferenceに保存します。
     // 忘れずにcommitメソッドを呼び出して保存処理を反映させます

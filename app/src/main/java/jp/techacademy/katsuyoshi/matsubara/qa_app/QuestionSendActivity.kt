@@ -125,7 +125,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
     // 許可されていなければrequestPermissionsメソッドで
     // 許可ダイアログを表示させます。
     override fun onClick(v: View) {
-        if (v === imageView) {
+        if (v === imageView) { //===と==の違い？調べたけどイマイチわからない・・・
             // パーミッションの許可状態を確認する
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -153,7 +153,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
 
             val data = HashMap<String, String>()
 
-            // UID
+            // UID TODO
             data["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
 
             // タイトルと本文を取得する
