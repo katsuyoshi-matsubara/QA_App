@@ -28,8 +28,8 @@ class QuestionDetailActivity : AppCompatActivity() {
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
     private lateinit var mFavoriteRef: DatabaseReference
-    //一時的にお気に入りの追加状態を保持する変数を定義0：未追加　1：追加済み
-    private  var mFavorite: Boolean = false
+
+    private  var mFavorite: Boolean = false //これはこのままでよい
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -52,51 +52,19 @@ class QuestionDetailActivity : AppCompatActivity() {
             mQuestion.answers.add(answer)
             mAdapter.notifyDataSetChanged()
         }
-
-        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
-
-        }
-
-        override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-
-        }
-
-        override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
-
-        }
-
-        override fun onCancelled(databaseError: DatabaseError) {
-
-        }
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+        override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
+        override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
+        override fun onCancelled(databaseError: DatabaseError) {}
     }
-    //TODO
+
+    //TODO  呼ばれる＝dataあるということなので以下の処理だけでよい
     private val mFavoriteListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-           // val map = dataSnapshot.value as Map<String, String>
-
-           // val favoriteUID = dataSnapshot.key ?: ""//?:
-
-            //favoriteButton.text =
-           // val body = map[""] ?: ""
-            //favoriteButton.text = map[String()] ?: ""
-            Log.d("favorite", "a")
-
-           /* for (answer in mQuestion.answers) {
-                //同じAnswerUidのものが存在しているときは何もしない
-                if (answerUid == answer.answerUid) {
-                    return
-                }
-            }
-
-            val body = map["body"] ?: ""
-            val name = map["name"] ?: ""
-            val uid = map["uid"] ?: ""
-
-            val answer = Answer(body, name, uid, answerUid)
-            mQuestion.answers.add(answer)
-            mAdapter.notifyDataSetChanged()*/
+            mFavorite = true
+            favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOn)
+            favoriteButton.setTextColor(getColor(R.color.colorButtonText))
         }
-
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
         override fun onChildRemoved(dataSnapshot: DataSnapshot) {}
         override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
@@ -106,7 +74,6 @@ class QuestionDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
-
         //渡ってきたQuestionのオブジェクトを保持する
         val extras = intent.extras
         mQuestion = extras.get("question") as Question
@@ -118,34 +85,25 @@ class QuestionDetailActivity : AppCompatActivity() {
         listView.adapter = mAdapter
         mAdapter.notifyDataSetChanged()
 
+        //課題
+        val user = FirebaseAuth.getInstance().currentUser
+        val databaseReference = FirebaseDatabase.getInstance().reference
+        //課題ログイン時にお気に入りボタンを表示
+        //この部分のコードの位置が後ろ過ぎたため最初うまくいかず場所調整、基本上から順に読まれる
+        if (user == null) {
+            favoriteButton.visibility = View.INVISIBLE
+        } else {
+            favoriteButton.visibility = View.VISIBLE
+        }
         //課題activity起動時にお気に入りボタンが押されているかの判断をする
         //TODO
-        val user = FirebaseAuth.getInstance().currentUser
-        val databaseReference = FirebaseDatabase.getInstance().getReference("ContentsPATH")
-        val mFavoriteRef = databaseReference.child(FavoritePath).child(UsersPATH).child(user!!.uid).child(
-            ContentsPATH)
-        mFavoriteRef.addChildEventListener(mFavoriteListener)
-
-        mFavoriteRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val value = dataSnapshot.getValue(String::class.java)
-                Toast.makeText(baseContext, value,
-                    Toast.LENGTH_LONG).show()
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(baseContext, "読み込み失敗",
-                    Toast.LENGTH_LONG).show()
-            }
-        })
-/*
-        if (mFavorite == false) {
-            favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOn)
-            favoriteButton.setTextColor(getColor(R.color.colorButtonText))
-        } else {
-            favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOff)
-            favoriteButton.setTextColor(getColor(R.color.colorButtonTextFavoriteOff))
+        if (user != null) {
+            //userがnullの時に落ちるのでif文にする
+            mFavoriteRef = databaseReference.child(FavoritePath).child(user!!.uid).child(mQuestion.questionUid)
+            mFavoriteRef.addChildEventListener(mFavoriteListener)
+            //最初mFavoriteRefにvalがついていて、メンバ変数扱いになっていなかった
         }
-*/
+
         fab.setOnClickListener {
             //ログイン済みのユーザーを取得する
             val user = FirebaseAuth.getInstance().currentUser
@@ -164,31 +122,25 @@ class QuestionDetailActivity : AppCompatActivity() {
             }
         }
 
-        //課題ログイン時にお気に入りボタンを表示
-        if (user == null) {
-            favoriteButton.visibility = View.INVISIBLE
-        } else {
-            favoriteButton.visibility = View.VISIBLE
-        }
-
         //課題お気に入りボタンを押したときの反応。色変える時の書き方注意
         //TODO
         favoriteButton.setOnClickListener {
             val user = FirebaseAuth.getInstance().currentUser
             val databaseReference = FirebaseDatabase.getInstance().reference
-            val favoriteRef = databaseReference.child(FavoritePath).child(UsersPATH).child(user!!.uid).child(
-                ContentsPATH).child(mQuestion.questionUid)
+             mFavoriteRef = databaseReference.child(FavoritePath).child(user!!.uid).child(mQuestion.questionUid)
+            val data = HashMap<String, String>()
+            data["genre"] = mQuestion.genre.toString()
 
             if (mFavorite == false) {
                 favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOn)
                 favoriteButton.setTextColor(getColor(R.color.colorButtonText))
                 mFavorite = true
-                favoriteRef.setValue(mQuestion.questionUid)
+                mFavoriteRef.setValue(data)
             } else {
                 favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOff)
                 favoriteButton.setTextColor(getColor(R.color.colorButtonTextFavoriteOff))
                 mFavorite = false
-                favoriteRef.removeValue()
+                mFavoriteRef.removeValue()
             }
         }
 
@@ -196,18 +148,5 @@ class QuestionDetailActivity : AppCompatActivity() {
         mAnswerRef = dataBaseReference.child(ContentsPATH)
             .child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
-
     }
-
-    /*override fun onResume() {
-        super.onResume()
-        //課題activity再開時にお気に入りボタンが押されているかの判断をする
-        if (favoriteFlag == false) {
-            favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOn)
-            favoriteButton.setTextColor(getColor(R.color.colorButtonText))
-        } else {
-            favoriteButton.setBackgroundResource(R.color.colorButtonFavoriteOff)
-            favoriteButton.setTextColor(getColor(R.color.colorButtonTextFavoriteOff))
-        }
-    }*/
 }
